@@ -8,7 +8,7 @@ Assembly-Csharp.csproj
 Assembly-CSharp-Editor.csproj
 Assembly-CSharp-Editor-firstpass.csproj
 Assembly-CSharp-firstpass.csproj
-.sln
+*.sln
 Assets/StreamingAssets/
 obj/
 /Build/
