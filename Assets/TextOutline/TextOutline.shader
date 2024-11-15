@@ -21,6 +21,8 @@
 
 		[Enum(UnityEngine.Rendering.CullMode)]_Cull ("Cull Mode", Int) = 0
 
+		[Toggle(IS_GAMMA_CORRECTION)] _IS_GAMMA_CORRECTION("Is Gamma Correction", Float) = 0
+
 		[Toggle(UNITY_UI_ALPHACLIP)] _UseUIAlphaClip("Use Alpha Clip", Float) = 0
 	}
 
@@ -64,6 +66,7 @@
 			//Add for RectMask2D
 			#include "UnityUI.cginc"
 			//End for RectMask2D
+			#include "UnityCG.cginc"
 
 			sampler2D _MainTex;
 			fixed4 _Color;
@@ -81,6 +84,7 @@
 			float4 _ClipRect;
 			//End for RectMask2D
 			float2 uv_MainTex;
+			float _IS_GAMMA_CORRECTION;
 
 			struct appdata
 			{
@@ -153,6 +157,10 @@
 					color.w *= IsInRect(IN.texcoord, IN.uv1, IN.uv2);	//uv1 uv2 存着原始字的uv长方形区域大小
 					float outlineWidth = IN.uv3.x == -1 ? _ShadowOutlineWidth : _OutlineWidth;
 					fixed4 outlineColor = IN.uv3.x == -1 ? _ShadowOutlineColor : IN.uv3;
+					if (_IS_GAMMA_CORRECTION == 1)
+                    {
+                        outlineColor.rgb = GammaToLinearSpace(outlineColor.rgb);
+                    }
 					half4 val = half4(outlineColor.rgb, 0);//val 是 _OutlineColor的rgb，a是后面计算的
 					
 					//这里需要避免for循环以及new数组
