@@ -10,8 +10,7 @@ namespace GMModule
         //static string sOutlineShader = "Tool/MyOutline";
         [HideInInspector]
         public Material material;
-        Text mText;
-        Text mLangText;
+
         bool mFindRenderCanvas;
         bool bSetPreviewCanvas = false;
         int iMatHash = 0;
@@ -141,8 +140,6 @@ namespace GMModule
         }
         #endregion
 
-        bool isDirty = false;
-        Font dirtyFont = null;
 
         protected override void Awake()
         {
@@ -150,8 +147,6 @@ namespace GMModule
             SetMat();
             ShaderRefresh();
 
-            mText = GetComponent<Text>();
-            mLangText = GetComponent<Text>();
             rectTransform = GetComponent<RectTransform>();
             //mat = mText.font.material;
             Font.textureRebuilt += OnFontTextureRebuilt;//字体贴图膨胀
@@ -160,8 +155,17 @@ namespace GMModule
 
         void OnFontTextureRebuilt(Font font)
         {
-            isDirty = true;
-            dirtyFont = font;
+            if (this == null || graphic == null) return;
+            Text text = graphic as Text;
+            if (text == null || text.font != font) return;
+
+            // Unity bug: font texture is resized in-place, _MainTex_TexelSize is not updated.
+            // Re-set the texture on canvasRenderer to force the update.
+            Texture tex = text.mainTexture;
+            graphic.canvasRenderer.SetTexture(null);
+            graphic.canvasRenderer.SetTexture(tex);
+
+            graphic.SetVerticesDirty();
         }
 
 
@@ -466,22 +470,6 @@ namespace GMModule
             }
         }
 
-        private void LateUpdate()
-        {
-            if (isDirty)
-            {
-                isDirty = false;
-                if (mLangText != null && mLangText.font == dirtyFont)
-                {
-                    mLangText.FontTextureChanged();
-                }
-                if (mText != null && mText.font == dirtyFont)
-                {
-                    mText.FontTextureChanged();
-                }
-                dirtyFont = null;
-            }
-        }
 
         public void SetColor(Color outline, Color grad1, Color grad2)
         {
